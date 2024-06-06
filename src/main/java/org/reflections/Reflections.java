@@ -1,42 +1,29 @@
 package org.reflections;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.collect.*;
-import org.reflections.scanners.*;
-import org.reflections.scanners.Scanner;
-import org.reflections.serializers.Serializer;
-import org.reflections.serializers.XmlSerializer;
-import org.reflections.util.*;
-import org.reflections.vfs.Vfs;
-import org.slf4j.Logger;
-
-import javax.annotation.Nullable;
-import java.io.*;
-
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.concat;
 import static java.lang.String.format;
+import static org.reflections.ReflectionUtils.filter;
+import static org.reflections.ReflectionUtils.forName;
+import static org.reflections.ReflectionUtils.forNames;
+import static org.reflections.ReflectionUtils.withAnnotation;
+import static org.reflections.ReflectionUtils.withAnyParameterAnnotation;
 import static org.reflections.ReflectionsStats.stats;
-import static org.reflections.scanners.Scanners.ConstructorsAnnotated;
-import static org.reflections.scanners.Scanners.ConstructorsParameter;
-import static org.reflections.scanners.Scanners.ConstructorsSignature;
-import static org.reflections.scanners.Scanners.FieldsAnnotated;
-import static org.reflections.scanners.Scanners.MethodsAnnotated;
-import static org.reflections.scanners.Scanners.MethodsParameter;
-import static org.reflections.scanners.Scanners.MethodsReturn;
-import static org.reflections.scanners.Scanners.MethodsSignature;
-import static org.reflections.scanners.Scanners.Resources;
-import static org.reflections.scanners.Scanners.SubTypes;
-import static org.reflections.scanners.Scanners.TypesAnnotated;
-import static org.reflections.util.ReflectionUtilsPredicates.withAnnotation;
-import static org.reflections.util.ReflectionUtilsPredicates.withAnyParameterAnnotation;
+import static org.reflections.util.Utils.close;
+import static org.reflections.util.Utils.findLogger;
+import static org.reflections.util.Utils.getConstructorsFromDescriptors;
+import static org.reflections.util.Utils.getFieldFromString;
+import static org.reflections.util.Utils.getMembersFromDescriptors;
+import static org.reflections.util.Utils.getMethodsFromDescriptors;
+import static org.reflections.util.Utils.name;
+import static org.reflections.util.Utils.names;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
@@ -44,36 +31,43 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Predicates.in;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Iterables.concat;
-import static java.lang.String.format;
-import static org.reflections.ReflectionUtils.*;
-import static org.reflections.util.Utils.*;
 import javax.annotation.Nullable;
 
 import org.reflections.ReflectionsStats.Timer;
+import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MemberUsageScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.MethodParameterNamesScanner;
+import org.reflections.scanners.MethodParameterScanner;
+import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.Scanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.serializers.Serializer;
 import org.reflections.serializers.XmlSerializer;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
-import org.reflections.util.NameHelper;
-import org.reflections.util.QueryFunction;
+import org.reflections.util.Utils;
 import org.reflections.vfs.Vfs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javassist.bytecode.ClassFile;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * Reflections one-stop-shop object
@@ -99,7 +93,7 @@ import javassist.bytecode.ClassFile;
  * <pre>
  *      Reflections reflections = new Reflections("my.package.prefix");
  *      //or
- *      Reflections reflections = new Reflections(ClasspathHelper.forPackage("my.package.prefix"), 
+ *      Reflections reflections = new Reflections(ClasspathHelper.forPackage("my.package.prefix"),
  *            new SubTypesScanner(), new TypesAnnotationScanner(), new FilterBuilder().include(...), ...);
  *
  *       //or using the ConfigurationBuilder
@@ -128,7 +122,7 @@ import javassist.bytecode.ClassFile;
  *       Set&#60Member> methodUsage =      reflections.getMethodUsage(Method.class);
  *       Set&#60Member> constructorUsage = reflections.getConstructorUsage(Constructor.class);
  * </pre>
- * <p>You can use other scanners defined in Reflections as well, such as: SubTypesScanner, TypeAnnotationsScanner (both default), 
+ * <p>You can use other scanners defined in Reflections as well, such as: SubTypesScanner, TypeAnnotationsScanner (both default),
  * ResourcesScanner, MethodAnnotationsScanner, ConstructorAnnotationsScanner, FieldAnnotationsScanner,
  * MethodParameterScanner, MethodParameterNamesScanner, MemberUsageScanner or any custom scanner.
  * <p>Use {@link #getStore()} to access and query the store directly
@@ -236,6 +230,7 @@ public class Reflections {
             try {
                 if (executorService != null) {
                     futures.add(executorService.submit(new Runnable() {
+                        @Override
                         public void run() {
                             if (log != null && log.isDebugEnabled()) log.debug("[" + Thread.currentThread().toString() + "] scanning " + url);
                             scan(url);
@@ -501,6 +496,7 @@ public class Reflections {
         if (honorInherited) {
             if (inherited) {
                 Iterable<String> subTypes = store.get(index(SubTypesScanner.class), filter(annotated, new Predicate<String>() {
+                    @Override
                     public boolean apply(@Nullable String input) {
                         final Class<?> type = forName(input, loaders());
                         return type != null && !type.isInterface();
@@ -620,6 +616,7 @@ public class Reflections {
      */
     public Set<String> getResources(final Pattern pattern) {
         return getResources(new Predicate<String>() {
+            @Override
             public boolean apply(String input) {
                 return pattern.matcher(input).matches();
             }
