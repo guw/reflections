@@ -20,10 +20,12 @@ public abstract class AbstractScanner implements Scanner {
 	private Multimap<String, String> store;
 	private Predicate<String> resultFilter = Predicates.alwaysTrue(); //accept all by default
 
+    @Override
     public boolean acceptsInput(String file) {
         return getMetadataAdapter().acceptsInput(file);
     }
 
+    @Override
     public Object scan(Vfs.File file, Object classObject) {
         if (classObject == null) {
             try {
@@ -43,14 +45,17 @@ public abstract class AbstractScanner implements Scanner {
         return configuration;
     }
 
+    @Override
     public void setConfiguration(final Configuration configuration) {
         this.configuration = configuration;
     }
 
+    @Override
     public Multimap<String, String> getStore() {
         return store;
     }
 
+    @Override
     public void setStore(final Multimap<String, String> store) {
         this.store = store;
     }
@@ -63,11 +68,13 @@ public abstract class AbstractScanner implements Scanner {
         this.resultFilter = resultFilter;
     }
 
+    @Override
     public Scanner filterResultsBy(Predicate<String> filter) {
         this.setResultFilter(filter); return this;
     }
 
     //
+    @Override
     public boolean acceptResult(final String fqn) {
 		return fqn != null && resultFilter.apply(fqn);
 	}

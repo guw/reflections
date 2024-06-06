@@ -87,7 +87,9 @@ public class ReflectionsTest {
 
         //annotation member value matching
         AC2 ac2 = new AC2() {
+            @Override
             public String value() {return "ugh?!";}
+            @Override
             public Class<? extends Annotation> annotationType() {return AC2.class;}};
 
         assertThat(reflections.getTypesAnnotatedWith(ac2), are(C3.class, C5.class, I3.class, C6.class, AC3.class, C7.class));
@@ -105,7 +107,9 @@ public class ReflectionsTest {
                         C4.class.getDeclaredMethod("m3")));
 
             AM1 am1 = new AM1() {
+                @Override
                 public String value() {return "1";}
+                @Override
                 public Class<? extends Annotation> annotationType() {return AM1.class;}
             };
             assertThat(reflections.getMethodsAnnotatedWith(am1),
@@ -124,7 +128,9 @@ public class ReflectionsTest {
                     are(C4.class.getDeclaredConstructor(String.class)));
 
             AM1 am1 = new AM1() {
+                @Override
                 public String value() {return "1";}
+                @Override
                 public Class<? extends Annotation> annotationType() {return AM1.class;}
             };
             assertThat(reflections.getConstructorsAnnotatedWith(am1),
@@ -143,7 +149,9 @@ public class ReflectionsTest {
                         ));
 
             assertThat(reflections.getFieldsAnnotatedWith(new AF1() {
+                            @Override
                             public String value() {return "2";}
+                            @Override
                             public Class<? extends Annotation> annotationType() {return AF1.class;}}),
                     are(C4.class.getDeclaredField("f2")));
         } catch (NoSuchFieldException e) {
@@ -182,7 +190,9 @@ public class ReflectionsTest {
 
             assertThat(reflections.getMethodsWithAnyParamAnnotated(
                     new AM1() {
+                        @Override
                         public String value() { return "2"; }
+                        @Override
                         public Class<? extends Annotation> annotationType() { return AM1.class; }
                     }),
                     are(C4.class.getDeclaredMethod("m4", String.class)));
@@ -206,7 +216,9 @@ public class ReflectionsTest {
 
         assertThat(reflections.getConstructorsWithAnyParamAnnotated(
                 new AM1() {
+                    @Override
                     public String value() { return "1"; }
+                    @Override
                     public Class<? extends Annotation> annotationType() { return AM1.class; }
                 }),
                 are(C4.class.getDeclaredConstructor(String.class)));
@@ -288,22 +300,26 @@ public class ReflectionsTest {
     }
 
     private final BaseMatcher<Set<Class<?>>> isEmpty = new BaseMatcher<Set<Class<?>>>() {
+        @Override
         public boolean matches(Object o) {
             return ((Collection<?>) o).isEmpty();
         }
 
+        @Override
         public void describeTo(Description description) {
             description.appendText("empty collection");
         }
     };
 
     private abstract static class Match<T> extends BaseMatcher<T> {
+        @Override
         public void describeTo(Description description) { }
     }
 
     public static <T> Matcher<Set<? super T>> are(final T... ts) {
         final Collection<?> c1 = Arrays.asList(ts);
         return new Match<Set<? super T>>() {
+            @Override
             public boolean matches(Object o) {
                 Collection<?> c2 = (Collection<?>) o;
                 return c1.containsAll(c2) && c2.containsAll(c1);
@@ -313,6 +329,7 @@ public class ReflectionsTest {
 
     private Matcher<Set<Class<?>>> annotatedWith(final Class<? extends Annotation> annotation) {
         return new Match<Set<Class<?>>>() {
+            @Override
             public boolean matches(Object o) {
                 for (Class<?> c : (Iterable<Class<?>>) o) {
                     if (!Iterables.contains(annotationTypes(Arrays.asList(c.getAnnotations())), annotation)) return false;
@@ -324,6 +341,7 @@ public class ReflectionsTest {
 
     private Matcher<Set<Class<?>>> metaAnnotatedWith(final Class<? extends Annotation> annotation) {
         return new Match<Set<Class<?>>>() {
+            @Override
             public boolean matches(Object o) {
                 for (Class<?> c : (Iterable<Class<?>>) o) {
                     Set<Class> result = Sets.newHashSet();
@@ -345,6 +363,7 @@ public class ReflectionsTest {
 
     private Iterable<Class<? extends Annotation>> annotationTypes(Iterable<Annotation> annotations) {
         return Iterables.transform(annotations, new Function<Annotation, Class<? extends Annotation>>() {
+            @Override
             @Nullable
             public Class<? extends Annotation> apply(@Nullable Annotation input) {
                 return input != null ? input.annotationType() : null;

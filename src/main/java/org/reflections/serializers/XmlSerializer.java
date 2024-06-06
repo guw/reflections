@@ -34,6 +34,7 @@ import java.lang.reflect.Constructor;
  * */
 public class XmlSerializer implements Serializer {
 
+    @Override
     public Reflections read(InputStream inputStream) {
         Reflections reflections;
         try {
@@ -67,6 +68,7 @@ public class XmlSerializer implements Serializer {
         return reflections;
     }
 
+    @Override
     public File save(final Reflections reflections, final String filename) {
         File file = Utils.prepareFile(filename);
 
@@ -85,6 +87,7 @@ public class XmlSerializer implements Serializer {
         return file;
     }
 
+    @Override
     public String toString(final Reflections reflections) {
         Document document = createDocument(reflections);
 

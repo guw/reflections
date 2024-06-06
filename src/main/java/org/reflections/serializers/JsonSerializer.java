@@ -29,10 +29,12 @@ import java.util.Set;
 public class JsonSerializer implements Serializer {
     private Gson gson;
 
+    @Override
     public Reflections read(InputStream inputStream) {
         return getGson().fromJson(new InputStreamReader(inputStream), Reflections.class);
     }
 
+    @Override
     public File save(Reflections reflections, String filename) {
         try {
             File file = Utils.prepareFile(filename);
@@ -43,6 +45,7 @@ public class JsonSerializer implements Serializer {
         }
     }
 
+    @Override
     public String toString(Reflections reflections) {
         return getGson().toJson(reflections);
     }
@@ -51,13 +54,16 @@ public class JsonSerializer implements Serializer {
         if (gson == null) {
             gson = new GsonBuilder()
                     .registerTypeAdapter(Multimap.class, new com.google.gson.JsonSerializer<Multimap>() {
+                        @Override
                         public JsonElement serialize(Multimap multimap, Type type, JsonSerializationContext jsonSerializationContext) {
                             return jsonSerializationContext.serialize(multimap.asMap());
                         }
                     })
                     .registerTypeAdapter(Multimap.class, new JsonDeserializer<Multimap>() {
+                        @Override
                         public Multimap deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
                             final SetMultimap<String,String> map = Multimaps.newSetMultimap(new HashMap<String, Collection<String>>(), new Supplier<Set<String>>() {
+                                @Override
                                 public Set<String> get() {
                                     return Sets.newHashSet();
                                 }

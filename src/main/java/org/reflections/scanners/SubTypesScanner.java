@@ -20,6 +20,7 @@ public class SubTypesScanner extends AbstractScanner {
         }
     }
 
+    @Override
     @SuppressWarnings({"unchecked"})
     public void scan(final Object cls) {
 		String className = getMetadataAdapter().getClassName(cls);

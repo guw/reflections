@@ -14,10 +14,12 @@ public class SystemFile implements Vfs.File {
         this.file = file;
     }
 
+    @Override
     public String getName() {
         return file.getName();
     }
 
+    @Override
     public String getRelativePath() {
         String filepath = file.getPath().replace("\\", "/");
         if (filepath.startsWith(root.getPath())) {
@@ -27,6 +29,7 @@ public class SystemFile implements Vfs.File {
         return null; //should not get here
     }
 
+    @Override
     public InputStream openInputStream() {
         try {
             return new FileInputStream(file);

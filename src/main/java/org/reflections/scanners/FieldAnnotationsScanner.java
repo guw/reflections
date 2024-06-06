@@ -5,6 +5,7 @@ import java.util.List;
 /** scans for field's annotations */
 @SuppressWarnings({"unchecked"})
 public class FieldAnnotationsScanner extends AbstractScanner {
+    @Override
     public void scan(final Object cls) {
         final String className = getMetadataAdapter().getClassName(cls);
         List<Object> fields = getMetadataAdapter().getFields(cls);

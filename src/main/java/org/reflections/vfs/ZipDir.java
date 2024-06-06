@@ -16,16 +16,20 @@ public class ZipDir implements Vfs.Dir {
         this.jarFile = jarFile;
     }
 
+    @Override
     public String getPath() {
         return jarFile.getName();
     }
 
+    @Override
     public Iterable<Vfs.File> getFiles() {
         return new Iterable<Vfs.File>() {
+            @Override
             public Iterator<Vfs.File> iterator() {
                 return new AbstractIterator<Vfs.File>() {
                     final Enumeration<? extends ZipEntry> entries = jarFile.entries();
 
+                    @Override
                     protected Vfs.File computeNext() {
                         while (entries.hasMoreElements()) {
                             ZipEntry entry = entries.nextElement();
@@ -41,6 +45,7 @@ public class ZipDir implements Vfs.Dir {
         };
     }
 
+    @Override
     public void close() {
         try { jarFile.close(); } catch (IOException e) {
             if (Reflections.log != null) {

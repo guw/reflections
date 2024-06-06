@@ -23,6 +23,7 @@ public class SystemDir implements Vfs.Dir {
         this.file = file;
     }
 
+    @Override
     public String getPath() {
         if (file == null) {
             return "/NO-SUCH-DIRECTORY/";
@@ -30,16 +31,19 @@ public class SystemDir implements Vfs.Dir {
         return file.getPath().replace("\\", "/");
     }
 
+    @Override
     public Iterable<Vfs.File> getFiles() {
         if (file == null || !file.exists()) {
             return Collections.emptyList();
         }
         return new Iterable<Vfs.File>() {
+            @Override
             public Iterator<Vfs.File> iterator() {
                 return new AbstractIterator<Vfs.File>() {
                     final Stack<File> stack = new Stack<File>();
                     {stack.addAll(listFiles(file));}
 
+                    @Override
                     protected Vfs.File computeNext() {
                         while (!stack.isEmpty()) {
                             final File file = stack.pop();
@@ -66,6 +70,7 @@ public class SystemDir implements Vfs.Dir {
             return Lists.newArrayList();
     }
 
+    @Override
     public void close() {
     }
 

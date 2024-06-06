@@ -48,6 +48,7 @@ public class ReflectionsCollectTest extends ReflectionsTest {
                         serializer));
     }
 
+    @Override
     @Test
     public void testResourcesScanner() {
         Predicate<String> filter = new FilterBuilder().include(".*\\.xml").include(".*\\.json");

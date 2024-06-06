@@ -64,6 +64,7 @@ public class JavaCodeSerializer implements Serializer {
     private static final String arrayDescriptor = "$$";
     private static final String tokenSeparator = "_";
 
+    @Override
     public Reflections read(InputStream inputStream) {
         throw new UnsupportedOperationException("read is not implemented on JavaCodeSerializer");
     }
@@ -73,6 +74,7 @@ public class JavaCodeSerializer implements Serializer {
      * for example <pre>/data/projects/my/src/main/java/org.my.project.MyStore</pre>
      * would create class MyStore in package org.my.project in the path /data/projects/my/src/main/java
      */
+    @Override
     public File save(Reflections reflections, String name) {
         if (name.endsWith("/")) {
             name = name.substring(0, name.length() - 1); //trim / at the end
@@ -117,6 +119,7 @@ public class JavaCodeSerializer implements Serializer {
         return file;
     }
 
+    @Override
     public String toString(Reflections reflections) {
         if (reflections.getStore().get(TypeElementsScanner.class.getSimpleName()).isEmpty()) {
             if (log != null) log.warn("JavaCodeSerializer needs TypeElementsScanner configured");
@@ -155,6 +158,7 @@ public class JavaCodeSerializer implements Serializer {
             List<String> annotations = Lists.newArrayList();
             List<String> fields = Lists.newArrayList();
             final Multimap<String,String> methods = Multimaps.newSetMultimap(new HashMap<String, Collection<String>>(), new Supplier<Set<String>>() {
+                @Override
                 public Set<String> get() {
                     return Sets.newHashSet();
                 }

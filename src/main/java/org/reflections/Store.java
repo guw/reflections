@@ -41,6 +41,7 @@ public class Store {
             SetMultimap<String, String> multimap =
                     Multimaps.newSetMultimap(new HashMap<String, Collection<String>>(),
                             new Supplier<Set<String>>() {
+                                @Override
                                 public Set<String> get() {
                                     return Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
                                 }
@@ -102,6 +103,7 @@ public class Store {
 
         private void addAll(Iterable<T> iterable) { chain.add(iterable); }
 
+        @Override
         public Iterator<T> iterator() { return Iterables.concat(chain).iterator(); }
     }
 }

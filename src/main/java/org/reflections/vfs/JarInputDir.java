@@ -23,12 +23,15 @@ public class JarInputDir implements Vfs.Dir {
         this.url = url;
     }
 
+    @Override
     public String getPath() {
         return url.getPath();
     }
 
+    @Override
     public Iterable<Vfs.File> getFiles() {
         return new Iterable<Vfs.File>() {
+            @Override
             public Iterator<Vfs.File> iterator() {
                 return new AbstractIterator<Vfs.File>() {
 
@@ -37,6 +40,7 @@ public class JarInputDir implements Vfs.Dir {
                         catch (Exception e) { throw new ReflectionsException("Could not open url connection", e); }
                     }
 
+                    @Override
                     protected Vfs.File computeNext() {
                         while (true) {
                             try {
@@ -61,6 +65,7 @@ public class JarInputDir implements Vfs.Dir {
         };
     }
 
+    @Override
     public void close() {
         Utils.close(jarInputStream);
     }

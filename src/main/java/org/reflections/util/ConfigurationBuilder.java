@@ -136,6 +136,7 @@ public class ConfigurationBuilder implements Configuration {
         return this;
     }
 
+    @Override
     @Nonnull
     public Set<Scanner> getScanners() {
 		return scanners;
@@ -153,6 +154,7 @@ public class ConfigurationBuilder implements Configuration {
         return this;
     }
 
+    @Override
     @Nonnull
     public Set<URL> getUrls() {
         return urls;
@@ -193,6 +195,7 @@ public class ConfigurationBuilder implements Configuration {
     /** returns the metadata adapter.
      * if javassist library exists in the classpath, this method returns {@link JavassistAdapter} otherwise defaults to {@link JavaReflectionAdapter}.
      * <p>the {@link JavassistAdapter} is preferred in terms of performance and class loading. */
+    @Override
     public MetadataAdapter getMetadataAdapter() {
         if (metadataAdapter != null) return metadataAdapter;
         else {
@@ -212,6 +215,7 @@ public class ConfigurationBuilder implements Configuration {
         return this;
     }
 
+    @Override
     @Nullable
     public Predicate<String> getInputsFilter() {
         return inputsFilter;
@@ -230,6 +234,7 @@ public class ConfigurationBuilder implements Configuration {
         return this;
     }
 
+    @Override
     @Nullable
     public ExecutorService getExecutorService() {
         return executorService;
@@ -256,6 +261,7 @@ public class ConfigurationBuilder implements Configuration {
         return this;
     }
 
+    @Override
     public Serializer getSerializer() {
         return serializer != null ? serializer : (serializer = new XmlSerializer()); //lazily defaults to XmlSerializer
     }
@@ -267,6 +273,7 @@ public class ConfigurationBuilder implements Configuration {
     }
 
     /** get class loader, might be used for scanning or resolving methods/fields */
+    @Override
     @Nullable
     public ClassLoader[] getClassLoaders() {
         return classLoaders;

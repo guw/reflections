@@ -1,10 +1,5 @@
 package org.reflections;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.reflections.util.ClasspathHelper;
-import sun.misc.ClassLoaderUtil;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -12,6 +7,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.reflections.util.ClasspathHelper;
 
 /**
  * Test ClasspathHelper utility class

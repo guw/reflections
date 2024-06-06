@@ -10,6 +10,7 @@ public class TypeElementsScanner extends AbstractScanner {
     private boolean includeAnnotations = true;
     private boolean publicOnly = true;
 
+    @Override
     public void scan(Object cls) {
         String className = getMetadataAdapter().getClassName(cls);
         if (!acceptResult(className)) return;

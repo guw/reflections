@@ -44,7 +44,9 @@ public class ReflectionUtilsTest {
         assertThat(getAllFields(TestModel.C4.class, withAnnotation(TestModel.AF1.class)), names("f1", "f2"));
 
         assertThat(getAllFields(TestModel.C4.class, withAnnotation(new TestModel.AF1() {
+            @Override
             public String value() {return "2";}
+            @Override
             public Class<? extends Annotation> annotationType() {return TestModel.AF1.class;}})),
                 names("f2"));
 
@@ -73,8 +75,7 @@ public class ReflectionUtilsTest {
         assertEquals(allMethods, allMethods1);
 
         for (Method method : allMethods) { //effectively invokable
-            //noinspection UnusedDeclaration
-            Object invoke = method.invoke(null, arg1);
+            method.invoke(null, arg1);
         }
     }
 
@@ -102,6 +103,7 @@ public class ReflectionUtilsTest {
 
     private Set<String> names(Set<? extends Member> o) {
         return Sets.newHashSet(transform(o, new Function<Member, String>() {
+            @Override
             public String apply(@Nullable Member input) {
                 return input.getName();
             }
@@ -111,12 +113,14 @@ public class ReflectionUtilsTest {
     private BaseMatcher<Set<? extends Member>> names(final String... namesArray) {
         return new BaseMatcher<Set<? extends Member>>() {
 
+                @Override
                 public boolean matches(Object o) {
                     Collection<String> transform = names((Set<Member>) o);
                     final Collection<?> names = Arrays.asList(namesArray);
                     return transform.containsAll(names) && names.containsAll(transform);
                 }
 
+                @Override
                 public void describeTo(Description description) {
                 }
             };

@@ -26,41 +26,49 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
     /**setting this to false will result in returning only visible annotations from the relevant methods here (only {@link java.lang.annotation.RetentionPolicy#RUNTIME})*/
     public static boolean includeInvisibleTag = true;
 
+    @Override
     public List<FieldInfo> getFields(final ClassFile cls) {
         //noinspection unchecked
         return cls.getFields();
     }
 
+    @Override
     public List<MethodInfo> getMethods(final ClassFile cls) {
         //noinspection unchecked
         return cls.getMethods();
     }
 
+    @Override
     public String getMethodName(final MethodInfo method) {
         return method.getName();
     }
 
+    @Override
     public List<String> getParameterNames(final MethodInfo method) {
         String descriptor = method.getDescriptor();
         descriptor = descriptor.substring(descriptor.indexOf("(") + 1, descriptor.lastIndexOf(")"));
         return splitDescriptorToTypeNames(descriptor);
     }
 
+    @Override
     public List<String> getClassAnnotationNames(final ClassFile aClass) {
         return getAnnotationNames((AnnotationsAttribute) aClass.getAttribute(AnnotationsAttribute.visibleTag),
                 includeInvisibleTag ? (AnnotationsAttribute) aClass.getAttribute(AnnotationsAttribute.invisibleTag) : null);
     }
 
+    @Override
     public List<String> getFieldAnnotationNames(final FieldInfo field) {
         return getAnnotationNames((AnnotationsAttribute) field.getAttribute(AnnotationsAttribute.visibleTag),
                 includeInvisibleTag ? (AnnotationsAttribute) field.getAttribute(AnnotationsAttribute.invisibleTag) : null);
     }
 
+    @Override
     public List<String> getMethodAnnotationNames(final MethodInfo method) {
         return getAnnotationNames((AnnotationsAttribute) method.getAttribute(AnnotationsAttribute.visibleTag),
                 includeInvisibleTag ? (AnnotationsAttribute) method.getAttribute(AnnotationsAttribute.invisibleTag) : null);
     }
 
+    @Override
     public List<String> getParameterAnnotationNames(final MethodInfo method, final int parameterIndex) {
         List<String> result = Lists.newArrayList();
 
@@ -82,16 +90,19 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
         return result;
     }
 
+    @Override
     public String getReturnTypeName(final MethodInfo method) {
         String descriptor = method.getDescriptor();
         descriptor = descriptor.substring(descriptor.lastIndexOf(")") + 1);
         return splitDescriptorToTypeNames(descriptor).get(0);
     }
 
+    @Override
     public String getFieldName(final FieldInfo field) {
         return field.getName();
     }
 
+    @Override
     public ClassFile getOfCreateClassObject(final Vfs.File file) {
         InputStream inputStream = null;
         try {
@@ -105,6 +116,7 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
         }
     }
 
+    @Override
     public String getMethodModifier(MethodInfo method) {
         int accessFlags = method.getAccessFlags();
         return isPrivate(accessFlags) ? "private" :
@@ -112,14 +124,17 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
                isPublic(accessFlags) ? "public" : "";
     }
 
+    @Override
     public String getMethodKey(ClassFile cls, MethodInfo method) {
         return getMethodName(method) + "(" + Joiner.on(", ").join(getParameterNames(method)) + ")";
     }
 
+    @Override
     public String getMethodFullKey(ClassFile cls, MethodInfo method) {
         return getClassName(cls) + "." + getMethodKey(cls, method);
     }
 
+    @Override
     public boolean isPublic(Object o) {
         Integer accessFlags =
                 o instanceof ClassFile ? ((ClassFile) o).getAccessFlags() :
@@ -130,18 +145,22 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
     }
 
     //
+    @Override
     public String getClassName(final ClassFile cls) {
         return cls.getName();
     }
 
+    @Override
     public String getSuperclassName(final ClassFile cls) {
         return cls.getSuperclass();
     }
 
+    @Override
     public List<String> getInterfacesNames(final ClassFile cls) {
         return Arrays.asList(cls.getInterfaces());
     }
 
+    @Override
     public boolean acceptsInput(String file) {
         return file.endsWith(".class");
     }

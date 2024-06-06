@@ -120,6 +120,7 @@ public abstract class Vfs {
     /** return an iterable of all {@link org.reflections.vfs.Vfs.File} in given urls, starting with given packagePrefix and matching nameFilter */
     public static Iterable<File> findFiles(final Collection<URL> inUrls, final String packagePrefix, final Predicate<String> nameFilter) {
         Predicate<File> fileNamePredicate = new Predicate<File>() {
+            @Override
             public boolean apply(File file) {
                 String path = file.getRelativePath();
                 if (path.startsWith(packagePrefix)) {
@@ -142,6 +143,7 @@ public abstract class Vfs {
             try {
                 result = Iterables.concat(result,
                         Iterables.filter(new Iterable<File>() {
+                            @Override
                             public Iterator<File> iterator() {
                                 return fromURL(url).getFiles().iterator();
                             }
@@ -208,20 +210,24 @@ public abstract class Vfs {
      * */
     public static enum DefaultUrlTypes implements UrlType {
         jarFile {
+            @Override
             public boolean matches(URL url) {
                 return url.getProtocol().equals("file") && hasJarFileInPath(url);
             }
 
+            @Override
             public Dir createDir(final URL url) throws Exception {
                 return new ZipDir(new JarFile(getFile(url)));
             }
         },
 
         jarUrl {
+            @Override
             public boolean matches(URL url) {
                 return "jar".equals(url.getProtocol()) || "zip".equals(url.getProtocol()) || "wsjar".equals(url.getProtocol());
             }
 
+            @Override
             public Dir createDir(URL url) throws Exception {
                 try {
                     URLConnection urlConnection = url.openConnection();
@@ -238,6 +244,7 @@ public abstract class Vfs {
         },
 
         directory {
+            @Override
             public boolean matches(URL url) {
                 if (url.getProtocol().equals("file") && !hasJarFileInPath(url)) {
                     java.io.File file = getFile(url);
@@ -245,16 +252,19 @@ public abstract class Vfs {
                 } else return false;
             }
 
+            @Override
             public Dir createDir(final URL url) throws Exception {
                 return new SystemDir(getFile(url));
             }
         },
 
         jboss_vfs {
+            @Override
             public boolean matches(URL url) {
                 return url.getProtocol().equals("vfs");
             }
 
+            @Override
             public Vfs.Dir createDir(URL url) throws Exception {
                 Object content = url.openConnection().getContent();
                 Class<?> virtualFile = ClasspathHelper.contextClassLoader().loadClass("org.jboss.vfs.VirtualFile");
@@ -267,20 +277,24 @@ public abstract class Vfs {
         },
 
         jboss_vfsfile {
+            @Override
             public boolean matches(URL url) throws Exception {
                 return "vfszip".equals(url.getProtocol()) || "vfsfile".equals(url.getProtocol());
             }
 
+            @Override
             public Dir createDir(URL url) throws Exception {
                 return new UrlTypeVFS().createDir(url);
             }
         },
 
         bundle {
+            @Override
             public boolean matches(URL url) throws Exception {
                 return url.getProtocol().startsWith("bundle");
             }
 
+            @Override
             public Dir createDir(URL url) throws Exception {
                 return fromURL((URL) ClasspathHelper.contextClassLoader().
                         loadClass("org.eclipse.core.runtime.FileLocator").getMethod("resolve", URL.class).invoke(null, url));
@@ -288,10 +302,12 @@ public abstract class Vfs {
         },
 
         jarInputStream {
+            @Override
             public boolean matches(URL url) throws Exception {
                 return url.toExternalForm().contains(".jar");
             }
 
+            @Override
             public Dir createDir(final URL url) throws Exception {
                 return new JarInputDir(url);
             }

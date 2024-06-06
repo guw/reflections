@@ -53,8 +53,7 @@ public class VfsTest {
             }
 
             ClassFile stringCF = mdAdapter.getOfCreateClassObject(file);
-            //noinspection UnusedDeclaration
-            String className = mdAdapter.getClassName(stringCF);
+            mdAdapter.getClassName(stringCF);
         }
 
         {
@@ -201,7 +200,9 @@ public class VfsTest {
     @Test @Ignore
     public void vfsFromHttpUrl() throws MalformedURLException {
         Vfs.addDefaultURLTypes(new Vfs.UrlType() {
+            @Override
             public boolean matches(URL url)         {return url.getProtocol().equals("http");}
+            @Override
             public Vfs.Dir createDir(final URL url) {return new HttpDir(url);}
         });
 
@@ -221,8 +222,11 @@ public class VfsTest {
             try { zipDir = new ZipDir(new JarFile(file)); } catch (Exception e) { throw new RuntimeException(e); }
         }
 
+        @Override
         public String getPath() {return path;}
+        @Override
         public Iterable<Vfs.File> getFiles() {return zipDir.getFiles();}
+        @Override
         public void close() {file.delete();}
 
         private static java.io.File downloadTempLocally(URL url) throws IOException {
@@ -256,7 +260,7 @@ public class VfsTest {
             try {
                 for (Vfs.File file : Iterables.limit(new JarInputDir(jar).getFiles(), 5)) {
                     if (file.getName().endsWith(".class")) {
-                        String className = javassistAdapter.getClassName(javassistAdapter.getOfCreateClassObject(file));
+                        javassistAdapter.getClassName(javassistAdapter.getOfCreateClassObject(file));
                     }
                 }
             } catch (Exception e) {
