@@ -13,6 +13,30 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.*;
+
+import static java.lang.String.format;
+import static org.reflections.ReflectionsStats.stats;
+import static org.reflections.scanners.Scanners.ConstructorsAnnotated;
+import static org.reflections.scanners.Scanners.ConstructorsParameter;
+import static org.reflections.scanners.Scanners.ConstructorsSignature;
+import static org.reflections.scanners.Scanners.FieldsAnnotated;
+import static org.reflections.scanners.Scanners.MethodsAnnotated;
+import static org.reflections.scanners.Scanners.MethodsParameter;
+import static org.reflections.scanners.Scanners.MethodsReturn;
+import static org.reflections.scanners.Scanners.MethodsSignature;
+import static org.reflections.scanners.Scanners.Resources;
+import static org.reflections.scanners.Scanners.SubTypes;
+import static org.reflections.scanners.Scanners.TypesAnnotated;
+import static org.reflections.util.ReflectionUtilsPredicates.withAnnotation;
+import static org.reflections.util.ReflectionUtilsPredicates.withAnyParameterAnnotation;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
@@ -32,6 +56,24 @@ import static com.google.common.collect.Iterables.concat;
 import static java.lang.String.format;
 import static org.reflections.ReflectionUtils.*;
 import static org.reflections.util.Utils.*;
+import javax.annotation.Nullable;
+
+import org.reflections.ReflectionsStats.Timer;
+import org.reflections.scanners.MemberUsageScanner;
+import org.reflections.scanners.MethodParameterNamesScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.serializers.Serializer;
+import org.reflections.serializers.XmlSerializer;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
+import org.reflections.util.NameHelper;
+import org.reflections.util.QueryFunction;
+import org.reflections.vfs.Vfs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javassist.bytecode.ClassFile;
 
 /**
  * Reflections one-stop-shop object
@@ -112,18 +154,19 @@ public class Reflections {
     public Reflections(final Configuration configuration) {
         this.configuration = configuration;
         store = new Store(configuration);
+        try(Timer timer = stats().timeScan()) {
+            if (configuration.getScanners() != null && !configuration.getScanners().isEmpty()) {
+                //inject to scanners
+                for (Scanner scanner : configuration.getScanners()) {
+                    scanner.setConfiguration(configuration);
+                    scanner.setStore(store.getOrCreate(scanner.getClass().getSimpleName()));
+                }
 
-        if (configuration.getScanners() != null && !configuration.getScanners().isEmpty()) {
-            //inject to scanners
-            for (Scanner scanner : configuration.getScanners()) {
-                scanner.setConfiguration(configuration);
-                scanner.setStore(store.getOrCreate(scanner.getClass().getSimpleName()));
-            }
+                scan();
 
-            scan();
-
-            if (configuration.shouldExpandSuperTypes()) {
-                expandSuperTypes();
+                if (configuration.shouldExpandSuperTypes()) {
+                    expandSuperTypes();
+                }
             }
         }
     }
