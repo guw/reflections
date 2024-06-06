@@ -606,8 +606,10 @@ public class Reflections {
      * <p>depends on ResourcesScanner configured
      * */
     public Set<String> getResources(final Predicate<String> namePredicate) {
-        Iterable<String> resources = Iterables.filter(store.get(index(ResourcesScanner.class)).keySet(), namePredicate);
-        return Sets.newHashSet(store.get(index(ResourcesScanner.class), resources));
+        try(Timer timer = stats().timeQuery()) {
+            Iterable<String> resources = Iterables.filter(store.get(index(ResourcesScanner.class)).keySet(), namePredicate);
+            return Sets.newHashSet(store.get(index(ResourcesScanner.class), resources));
+        }
     }
 
     /** get resources relative paths where simple name (key) matches given regular expression
