@@ -5,6 +5,6 @@ package(default_visibility = ["//visibility:public"])
 
 java_import(
     name = "org_reflections_reflections",
-    jars = glob(["target/reflections-*-SNAPSHOT.jar"], allow_empty=False),
-    srcjar = glob(["target/reflections-*-SNAPSHOT-sources.jar"], allow_empty=False)[0],
+    jars = glob(["target/reflections-0.9.11.jar"], allow_empty=False),
+    srcjar = glob(["target/reflections-*-sources.jar"], allow_empty=False)[0],
 )
